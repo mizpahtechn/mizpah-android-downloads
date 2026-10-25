@@ -4,139 +4,264 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#064e3b">
+
   <title>Email Verification | Mizpah Smart Hatchery</title>
+
   <style>
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      margin: 0; min-height: 100vh; display: grid; place-items: center;
-      padding: 24px; background: #052e25; color: #f8fafc;
-      font-family: Arial, sans-serif;
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background: #052e25;
+      color: #f8fafc;
+      font-family: Arial, Helvetica, sans-serif;
     }
+
     main {
-      max-width: 520px; width: 100%; padding: 32px 24px;
-      text-align: center; background: #064e3b;
-      border: 2px solid #d4af37; border-radius: 20px;
+      max-width: 520px;
+      width: 100%;
+      padding: 32px 24px;
+      text-align: center;
+      background: #064e3b;
+      border: 2px solid #d4af37;
+      border-radius: 20px;
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.25);
     }
-    h1 { color: #e4c45c; }
-    p { line-height: 1.65; }
+
+    h1 {
+      margin-top: 0;
+      color: #e4c45c;
+      font-size: 1.8rem;
+    }
+
+    h2 {
+      font-size: 1.3rem;
+    }
+
+    p {
+      line-height: 1.65;
+    }
+
     #status {
-      margin: 24px 0; padding: 16px; border: 1px solid #d4af37;
-      border-radius: 12px; overflow-wrap: anywhere;
+      margin: 24px 0;
+      padding: 16px;
+      border: 1px solid #d4af37;
+      border-radius: 12px;
+      overflow-wrap: anywhere;
     }
-    a {
-      display: block; margin: 14px 0; padding: 14px;
-      border-radius: 10px; background: #d4af37; color: #10251c;
-      font-weight: bold; text-decoration: none;
+
+    a.button {
+      display: block;
+      margin: 14px 0;
+      padding: 14px;
+      border: 1px solid #d4af37;
+      border-radius: 10px;
+      background: #d4af37;
+      color: #10251c;
+      font-weight: bold;
+      text-decoration: none;
     }
-    a.secondary { background: transparent; border: 1px solid #d4af37; color: white; }
-    footer { margin-top: 24px; color: #d1d5db; font-size: .9rem; }
+
+    a.button:hover {
+      opacity: 0.9;
+    }
+
+    a.secondary {
+      background: transparent;
+      color: #ffffff;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    footer {
+      margin-top: 24px;
+      color: #d1d5db;
+      font-size: 0.9rem;
+    }
   </style>
 </head>
+
 <body>
-<main>
-  <h1>Mizpah Smart Hatchery</h1>
-  <p><strong>Healthy Chicks | Better Tomorrow</strong></p>
+  <main>
+    <h1>Mizpah Smart Hatchery</h1>
 
-  <section id="status" role="status" aria-live="polite">
-    <h2>Checking your email confirmation…</h2>
-    <p>Please wait while Supabase checks your confirmation link.</p>
-  </section>
+    <p><strong>Healthy Chicks | Better Tomorrow</strong></p>
 
-  <p id="instructions">
-    After successful verification, you can sign in on the device where
-    you installed Mizpah Smart Hatchery.
-  </p>
+    <section id="status" role="status" aria-live="polite">
+      <h2>Checking your email confirmation…</h2>
+      <p>Please wait while we verify your email address.</p>
+    </section>
 
-  <a id="openApp" class="secondary"
-     href="mizpahsmart://auth/callback" hidden>Open Mizpah Smart Hatchery</a>
+    <p id="instructions">
+      After successful verification, you can sign in to Mizpah Smart
+      Hatchery on your device.
+    </p>
 
-  <a href="https://github.com/mizpahtechn/mizpah-android-downloads/releases">
-    Download Mizpah Smart Hatchery for Android
-  </a>
+    <a
+      id="openApp"
+      class="button secondary"
+      href="mizpahsmart://auth/callback"
+      hidden
+    >
+      Open Mizpah Smart Hatchery
+    </a>
 
-  <footer>
-    Healthy Chicks | Better Tomorrow<br>
-    Ensuring Customer Satisfaction
-  </footer>
-</main>
+    <a
+      class="button"
+      href="https://github.com/mizpahtechn/mizpah-android-downloads/releases"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Download Mizpah Smart Hatchery for Android
+    </a>
 
-<script>
-(async function () {
-  const SUPABASE_URL = "https://ouebgmhtyekqnyrkfrcp.supabase.co";
-  const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_4PQqWYUXAi_ECtiSv063NA_G5G7IKDk";
+    <footer>
+      Healthy Chicks | Better Tomorrow<br>
+      Ensuring Customer Satisfaction
+    </footer>
+  </main>
 
-  const status = document.getElementById("status");
-  const openApp = document.getElementById("openApp");
-  const params = new URLSearchParams(window.location.search);
+  <script>
+    (async function () {
+      /*
+       * CONFIGURATION
+       *
+       * 1. Insert your actual Supabase project URL.
+       * 2. Insert your Supabase publishable key.
+       *
+       * Never put a service-role key or secret API key here.
+       */
 
-  const tokenHash = params.get("token_hash");
-  const type = params.get("type");
+      const SUPABASE_URL =
+        "https://YOUR_PROJECT_REF.supabase.co";
 
-  function showError(message) {
-    status.innerHTML = "";
-    const heading = document.createElement("h2");
-    heading.textContent = "Email verification unsuccessful";
-    const paragraph = document.createElement("p");
-    paragraph.textContent = message;
-    status.append(heading, paragraph);
-  }
+      const SUPABASE_PUBLISHABLE_KEY =
+        "sb_publishable_4PQqWYUXAi_ECtiSv063NA_G5G7IKDk";
 
-  if (SUPABASE_PUBLISHABLE_KEY === "sb_publishable_4PQqWYUXAi_ECtiSv063NA_G5G7IKDk") {
-    showError("The verification page has not been configured yet.");
-    return;
-  }
+      const status = document.getElementById("status");
+      const openApp = document.getElementById("openApp");
 
-  if (!tokenHash || type !== "email") {
-    showError(
-      "This confirmation link is missing its verification details. " +
-      "It may be an old link. Request a new confirmation email and open its link."
-    );
-    return;
-  }
+      const params = new URLSearchParams(window.location.search);
 
-  try {
-    const response = await fetch(`${SUPABASE_URL}/auth/v1/verify`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "apikey": SUPABASE_PUBLISHABLE_KEY
-      },
-      body: JSON.stringify({
-        token_hash: tokenHash,
-        type: "email"
-      })
-    });
+      const tokenHash = params.get("token_hash");
+      const type = params.get("type");
 
-    const result = await response.json();
+      function showMessage(title, message) {
+        status.replaceChildren();
 
-    if (!response.ok || !result.user) {
-      throw new Error(
-        "This confirmation link may have expired or already been used. " +
-        "Request a new confirmation email and try again."
-      );
-    }
+        const heading = document.createElement("h2");
+        heading.textContent = title;
 
-    status.innerHTML = "";
-    const heading = document.createElement("h2");
-    heading.textContent = "Email verified successfully!";
-    const paragraph = document.createElement("p");
-    paragraph.textContent =
-      "Your email has been verified by Supabase. You can now sign in " +
-      "on the device where Mizpah Smart Hatchery is installed.";
-    status.append(heading, paragraph);
+        const paragraph = document.createElement("p");
+        paragraph.textContent = message;
 
-    openApp.hidden = false;
+        status.append(heading, paragraph);
+      }
 
-    // Remove the one-time token from the visible browser URL.
-    window.history.replaceState({}, document.title, window.location.pathname);
+      function showError(message) {
+        showMessage("Email verification unsuccessful", message);
+      }
 
-  } catch (error) {
-    showError(
-      error.message ||
-      "We could not verify this link. Check your internet connection or request a new confirmation email."
-    );
-  }
-})();
-</script>
+      // Check whether the Supabase configuration has been entered.
+      if (
+        !SUPABASE_URL ||
+        SUPABASE_URL.includes("YOUR_PROJECT_REF") ||
+        !SUPABASE_PUBLISHABLE_KEY ||
+        SUPABASE_PUBLISHABLE_KEY ===
+          "PASTE_YOUR_SUPABASE_PUBLISHABLE_KEY_HERE"
+      ) {
+        showError(
+          "The verification page has not been configured yet. " +
+          "Please contact the website administrator."
+        );
+        return;
+      }
+
+      // A real confirmation link must include both parameters.
+      if (!tokenHash || type !== "email") {
+        showError(
+          "This page was opened without valid email verification details. " +
+          "Please open the newest confirmation link sent to your email. " +
+          "If the link has expired, request another confirmation email."
+        );
+        return;
+      }
+
+      try {
+        showMessage(
+          "Verifying your email…",
+          "Please wait while Supabase confirms your email address. " +
+          "Do not close this page."
+        );
+
+        const response = await fetch(
+          `${SUPABASE_URL}/auth/v1/verify`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "apikey": SUPABASE_PUBLISHABLE_KEY
+            },
+            body: JSON.stringify({
+              token_hash: tokenHash,
+              type: "email"
+            })
+          }
+        );
+
+        let result;
+
+        try {
+          result = await response.json();
+        } catch {
+          throw new Error(
+            "The verification service returned an unexpected response. " +
+            "Please try again later."
+          );
+        }
+
+        if (!response.ok || !result.user) {
+          throw new Error(
+            "This confirmation link may have expired, already been used, " +
+            "or become invalid. Request a new confirmation email and " +
+            "open its newest link."
+          );
+        }
+
+        showMessage(
+          "Email verified successfully!",
+          "Supabase has confirmed your email address. " +
+          "You can now sign in to Mizpah Smart Hatchery."
+        );
+
+        openApp.hidden = false;
+
+        // Remove the one-time verification token from the address bar.
+        // The token is not stored in local storage or cookies by this page.
+        window.history.replaceState(
+          {},
+          document.title,
+          window.location.pathname
+        );
+
+      } catch (error) {
+        showError(
+          error instanceof TypeError
+            ? "We could not connect to the verification service. " +
+              "Check your internet connection and try again."
+            : error.message ||
+              "Verification failed. Please request a new confirmation email."
+        );
+      }
+    })();
+  </script>
 </body>
 </html>
