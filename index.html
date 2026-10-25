@@ -1,105 +1,143 @@
-<!DOCTYPE html>
 
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#064e3b">
-  <title>Email Confirmation | Mizpah Smart Hatchery</title>
+  <title>Email Verification | Mizpah Smart Hatchery</title>
   <style>
     * { box-sizing: border-box; }
-
-```
-body {
-  margin: 0;
-  min-height: 100vh;
-  display: grid;
-  place-items: center;
-  padding: 24px;
-  background: #052e25;
-  color: #f8fafc;
-  font-family: Arial, sans-serif;
-}
-
-main {
-  width: 100%;
-  max-width: 520px;
-  padding: 36px 26px;
-  text-align: center;
-  background: #064e3b;
-  border: 2px solid #d4af37;
-  border-radius: 20px;
-  box-shadow: 0 16px 45px #0005;
-}
-
-h1 { color: #e4c45c; font-size: 1.8rem; }
-p { line-height: 1.7; color: #e5e7eb; }
-
-.status {
-  margin: 24px 0;
-  padding: 16px;
-  border-radius: 12px;
-  background: #073d30;
-  border: 1px solid #d4af37;
-}
-
-.button {
-  display: block;
-  margin: 14px 0;
-  padding: 14px 18px;
-  border-radius: 10px;
-  background: #d4af37;
-  color: #10251c;
-  font-weight: bold;
-  text-decoration: none;
-}
-
-.secondary {
-  background: transparent;
-  border: 1px solid #d4af37;
-  color: #f8fafc;
-}
-
-footer { margin-top: 24px; font-size: .9rem; color: #d1d5db; }
-```
-
+    body {
+      margin: 0; min-height: 100vh; display: grid; place-items: center;
+      padding: 24px; background: #052e25; color: #f8fafc;
+      font-family: Arial, sans-serif;
+    }
+    main {
+      max-width: 520px; width: 100%; padding: 32px 24px;
+      text-align: center; background: #064e3b;
+      border: 2px solid #d4af37; border-radius: 20px;
+    }
+    h1 { color: #e4c45c; }
+    p { line-height: 1.65; }
+    #status {
+      margin: 24px 0; padding: 16px; border: 1px solid #d4af37;
+      border-radius: 12px; overflow-wrap: anywhere;
+    }
+    a {
+      display: block; margin: 14px 0; padding: 14px;
+      border-radius: 10px; background: #d4af37; color: #10251c;
+      font-weight: bold; text-decoration: none;
+    }
+    a.secondary { background: transparent; border: 1px solid #d4af37; color: white; }
+    footer { margin-top: 24px; color: #d1d5db; font-size: .9rem; }
   </style>
 </head>
 <body>
-  <main>
-    <h1>Mizpah Smart Hatchery</h1>
-    <p><strong>Healthy Chicks | Better Tomorrow</strong></p>
+<main>
+  <h1>Mizpah Smart Hatchery</h1>
+  <p><strong>Healthy Chicks | Better Tomorrow</strong></p>
 
-```
-<div class="status" role="status">
-  <h2>Email confirmation</h2>
-  <p>
-    This page is ready for the confirmation process.
-    Your email verification status has not yet been checked.
+  <section id="status" role="status" aria-live="polite">
+    <h2>Checking your email confirmation…</h2>
+    <p>Please wait while Supabase checks your confirmation link.</p>
+  </section>
+
+  <p id="instructions">
+    After successful verification, you can sign in on the device where
+    you installed Mizpah Smart Hatchery.
   </p>
-</div>
 
-<p>
-  After your email has been successfully verified, return to the
-  device where you installed Mizpah Smart Hatchery and sign in.
-</p>
+  <a id="openApp" class="secondary"
+     href="mizpahsmart://auth/callback" hidden>Open Mizpah Smart Hatchery</a>
 
-<a class="button"
-   href="https://github.com/mizpahtechn/mizpah-android-downloads/releases">
-  Download Mizpah Smart Hatchery for Android
-</a>
+  <a href="https://github.com/mizpahtechn/mizpah-android-downloads/releases">
+    Download Mizpah Smart Hatchery for Android
+  </a>
 
-<a class="button secondary"
-   href="https://github.com/mizpahtechn/mizpah-android-downloads">
-  Visit Official Downloads
-</a>
+  <footer>
+    Healthy Chicks | Better Tomorrow<br>
+    Ensuring Customer Satisfaction
+  </footer>
+</main>
 
-<footer>
-  &copy; Mizpah Smart Hatchery<br>
-  Ensuring Customer Satisfaction
-</footer>
-```
+<script>
+(async function () {
+  const SUPABASE_URL = "https://ouebgmhtyekqnyrkfrcp.supabase.co";
+  const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_4PQqWYUXAi_ECtiSv063NA_G5G7IKDk";
 
-  </main>
+  const status = document.getElementById("status");
+  const openApp = document.getElementById("openApp");
+  const params = new URLSearchParams(window.location.search);
+
+  const tokenHash = params.get("token_hash");
+  const type = params.get("type");
+
+  function showError(message) {
+    status.innerHTML = "";
+    const heading = document.createElement("h2");
+    heading.textContent = "Email verification unsuccessful";
+    const paragraph = document.createElement("p");
+    paragraph.textContent = message;
+    status.append(heading, paragraph);
+  }
+
+  if (SUPABASE_PUBLISHABLE_KEY === "REPLACE_WITH_YOUR_PUBLISHABLE_KEY") {
+    showError("The verification page has not been configured yet.");
+    return;
+  }
+
+  if (!tokenHash || type !== "email") {
+    showError(
+      "This confirmation link is missing its verification details. " +
+      "It may be an old link. Request a new confirmation email and open its link."
+    );
+    return;
+  }
+
+  try {
+    const response = await fetch(`${SUPABASE_URL}/auth/v1/verify`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": SUPABASE_PUBLISHABLE_KEY
+      },
+      body: JSON.stringify({
+        token_hash: tokenHash,
+        type: "email"
+      })
+    });
+
+    const result = await response.json();
+
+    if (!response.ok || !result.user) {
+      throw new Error(
+        "This confirmation link may have expired or already been used. " +
+        "Request a new confirmation email and try again."
+      );
+    }
+
+    status.innerHTML = "";
+    const heading = document.createElement("h2");
+    heading.textContent = "Email verified successfully!";
+    const paragraph = document.createElement("p");
+    paragraph.textContent =
+      "Your email has been verified by Supabase. You can now sign in " +
+      "on the device where Mizpah Smart Hatchery is installed.";
+    status.append(heading, paragraph);
+
+    openApp.hidden = false;
+
+    // Remove the one-time token from the visible browser URL.
+    window.history.replaceState({}, document.title, window.location.pathname);
+
+  } catch (error) {
+    showError(
+      error.message ||
+      "We could not verify this link. Check your internet connection or request a new confirmation email."
+    );
+  }
+})();
+</script>
 </body>
 </html>
